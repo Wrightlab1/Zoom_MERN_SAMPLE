@@ -22,7 +22,6 @@ router.patch("/me", protect, z_updateUser)
 
 router.get("/me", protect, z_getUser)
 
-//router.delete("/me", protect, z_deleteUser)
 
 
 module.exports = router;

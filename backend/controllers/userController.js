@@ -127,6 +127,13 @@ const getUser = asyncHandler(async(req,res) => {
 // @access PRIVATE
 const deleteUser = asyncHandler(async(req, res) => {
   const {_id, name, email, zoomID} = await User.findById(req.user.id)
+  User.remove({email : email}, function(err, result) {
+    if (err) {
+      console.log(err)
+    } else {
+      dbResult= result
+    }
+  })
   const deleteZoomUser =  () => {
     //get query parameters
     let action = req.query.action
@@ -134,7 +141,11 @@ const deleteUser = asyncHandler(async(req, res) => {
     let transfer_meeting = req.query.transfer_meeting
     let transfer_webinar = req.query.transfer_webinar
     let transfer_recording = req.query.transfer_recording
-    queryParams = `?action=${action}&transfer_email=${transfer_email}&transfer_meeting=${transfer_meeting}&transfer_webinar=${transfer_webinar}&transfer_recording=${transfer_recording}`
+    queryParams = `?action=${action}
+    &transfer_email=${transfer_email}
+    &transfer_meeting=${transfer_meeting}
+    &transfer_webinar=${transfer_webinar}
+    &transfer_recording=${transfer_recording}`
     url = `/users/${zoomID}${queryParams}`
     return API_Helper.make_API_call(url, "DELETE")
     }
@@ -144,9 +155,9 @@ const deleteUser = asyncHandler(async(req, res) => {
   )
   zoomUser.then(function(result){
     zoomUserID =  result
-  res.status(200).json({ message : "user deleted"})
+  res.status(200).json({ id : req.user.id , message : dbResult})
   })
-  User.remove({id : req.user.id})
+
 })
 
 //generate JWT
