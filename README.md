@@ -51,7 +51,7 @@ Authentication: After creating a user you will recieve a JWT. You will need to p
 
 ##Endpoints
 ###Users
-| Endpoint             |Method | URL                                      | Requires Auth    | Zoom Documentation                                                       |
-| ---------------------|-------|----------------------------------------------------------|--------------------------------------------------------------------------|
-| Create a User        |POST   |`http://localhost:{PORT}/api/users`       |     False         |(https://marketplace.zoom.us/docs/api-reference/zoom-api/users/usercreate)|
-| Delete a User        |DELETE |`http://localhost:{PORT}/api/users/me`    |       True        |(https://marketplace.zoom.us/docs/api-reference/zoom-api/users/userdelete)|
+| Endpoint             |Method | URL                                      | Requires Auth | Zoom Documentation                                                       |
+| ---------------------|-------|------------------------------------------|---------------|--------------------------------------------------------------------------|
+| Create a User        |POST   |`http://localhost:{PORT}/api/users`       |     False     |(https://marketplace.zoom.us/docs/api-reference/zoom-api/users/usercreate)|
+| Delete a User        |DELETE |`http://localhost:{PORT}/api/users/me`    |     True      |(https://marketplace.zoom.us/docs/api-reference/zoom-api/users/userdelete)|
