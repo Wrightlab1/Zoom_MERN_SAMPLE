@@ -11,9 +11,7 @@ module.exports = {
   make_API_call : function(path,method,data) {
     
     console.log(`${method} request sent to https://api.zoom.us/v2${path}`.yellow)
-    if (data) {
-      console.log(data)
-    }
+    
     //Create JWT
     const payload = {
       iss: process.env.ZOOM_API_KEY,
@@ -21,7 +19,7 @@ module.exports = {
   };
     
     const token = jwt.sign(payload, process.env.ZOOM_API_SECRET);
-    console.log(`jwt : ${token}`)
+    console.log(`jwt : ${token}`.yellow)
 
 //SEND REQUEST
   
@@ -46,15 +44,19 @@ return new Promise(function (resolve, reject) {
    
 
   // cumulate data
-  var body = [];
+  let body = [];
   res.on('data', function(chunk) {
       body.push(chunk);
   });
   
+
+
   // resolve on end
   res.on('end', function() {
       try {
+          if(res.statusCode != 204) {
           body = JSON.parse(Buffer.concat(body).toString());
+          }
           
         
       } catch(e) {
@@ -71,6 +73,7 @@ req.on('error', function(err) {
 
 //If Body is defined add body to request
 if (data) {
+  console.log(JSON.stringify(data))
   const postData = JSON.stringify(data);
   req.write(postData);
 }

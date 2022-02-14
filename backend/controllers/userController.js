@@ -30,28 +30,38 @@ const registerUser = asyncHandler(async(req,res) => {
   //hash the password
   const salt = await bcrypt.genSalt(10)
   const hashedPassword = await bcrypt.hash(password, salt)
-
+  
   //create the User
   const user = await User.create({
     name,
     email,
-    password : hashedPassword
-  })
+    password : hashedPassword,
+    zoomID: 0
+})
 
   //Create the user in Zoom
   const createZoomUser =  () => {
     url = "/users/"
-    first_name = user.name.split(" ")[0]
-    last_name = user.name.split(" ")[1]
+    first_name = name.split(" ")[0]
+    last_name = name.split(" ")[1]
     data = {action : process.env.ZOOM_USERCREATE_ACTION, user_info : {email : `${user.id}@${process.env.ZOOM_DOMAIN}`, type : process.env.ZOOM_USER_TYPE, first_name : first_name, last_name : last_name}}
     return API_Helper.make_API_call(url, "POST", data)
     }
 
   const zoomUser = createZoomUser(
-    console.log("here")
+    console.log(" ")
   )
   zoomUser.then(function(result){
     zoomUserID =  result.id
+  
+    //Add zoomUserID to model
+    User.updateOne({_id: user.id }, {zoomID:zoomUserID}, function(err, docs) {
+      if (err) {
+        console.log(err)
+      } else {
+        console.log("ZoomID added to db")
+      }
+    })
     //respond if user created successfully
   if (user) {
     res.status(201).json({
@@ -67,22 +77,8 @@ const registerUser = asyncHandler(async(req,res) => {
     }
 })
   })
-/*
-  //respond if user created successfully
-  if (user) {
-    res.status(201).json({
-      _id : user.id,
-      name : user.name,
-      email : user.email,
-      zoomID : zoomUserID,
-      token : generateToken(user._id)
-    })
-  } else {
-      res.status(400)
-      throw new Error("INVALID USER DATA")
-    }
-})
-*/
+
+
 // @desc Authenticate a User
 // @route api/users/login
 // access PUBLIC
@@ -112,11 +108,12 @@ const authenticateUser = asyncHandler(async(req,res) => {
 // @access PRIVATE
 const getUser = asyncHandler(async(req,res) => {
   try {
-    const {_id, name, email} = await User.findById(req.user.id)
+    const {_id, name, email, zoomID} = await User.findById(req.user.id)
   res.status(200).json({
    id: _id,
    name,
-   email
+   email,
+   zoomID: zoomID
  })
   } catch (error) {
     res.status(401).json({error : "user does not exist"})
@@ -126,12 +123,30 @@ const getUser = asyncHandler(async(req,res) => {
 })
 
 // @desc Delete a User
-// route DELETE /api/users/:id
+// route DELETE /api/users/me
 // @access PRIVATE
 const deleteUser = asyncHandler(async(req, res) => {
-  const {_id, name, email} = await User.remove({id : req.user.id})
+  const {_id, name, email, zoomID} = await User.findById(req.user.id)
+  const deleteZoomUser =  () => {
+    //get query parameters
+    let action = req.query.action
+    let transfer_email = req.query.transfer_email
+    let transfer_meeting = req.query.transfer_meeting
+    let transfer_webinar = req.query.transfer_webinar
+    let transfer_recording = req.query.transfer_recording
+    queryParams = `?action=${action}&transfer_email=${transfer_email}&transfer_meeting=${transfer_meeting}&transfer_webinar=${transfer_webinar}&transfer_recording=${transfer_recording}`
+    url = `/users/${zoomID}${queryParams}`
+    return API_Helper.make_API_call(url, "DELETE")
+    }
+
+  const zoomUser = deleteZoomUser(
+    console.log(" ")
+  )
+  zoomUser.then(function(result){
+    zoomUserID =  result
   res.status(200).json({ message : "user deleted"})
-  
+  })
+  User.remove({id : req.user.id})
 })
 
 //generate JWT

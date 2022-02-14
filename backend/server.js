@@ -20,6 +20,7 @@ app.use(express.urlencoded({extended: false}))
 
 //routes app.use(route, require(path))
 app.use("/api/users", require("./routes/userRoutes"))
+app.use("/api/zoom/users", require("./routes/z_userRoutes"))
 
 //middleware
 app.use(errorHandler)
